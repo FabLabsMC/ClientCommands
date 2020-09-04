@@ -1,7 +1,10 @@
 {
   "required": true,
-  "package": "io.github.fablabsmc.blueprint.mixin",
+  "package": "io.github.fablabsmc.fablabs.mixin.command",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ClientPlayerEntityMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "CommandSuggestorMixin"
   ]
 }
