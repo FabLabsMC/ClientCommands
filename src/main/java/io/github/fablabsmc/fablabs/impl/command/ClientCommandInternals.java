@@ -47,7 +47,7 @@ public final class ClientCommandInternals {
 	private static final Map<Character, CommandDispatcher<CommandSource>> dispatchers = new HashMap<>();
 
 	public static Event<ClientCommandRegistrationCallback> event(char prefix) {
-		if (Character.isLetterOrDigit(prefix)) {
+		if (isInvalidCommandPrefix(prefix)) {
 			throw new IllegalArgumentException("Command prefix '" + prefix + "' cannot be a letter or a digit!");
 		}
 
@@ -113,5 +113,13 @@ public final class ClientCommandInternals {
 		if (event != null) {
 			event.invoker().register(dispatcher);
 		}
+	}
+
+	public static boolean isInvalidCommandPrefix(char prefix) {
+		return Character.isLetterOrDigit(prefix);
+	}
+
+	public static boolean isPrefixUsed(char prefix) {
+		return events.get(prefix) != null;
 	}
 }
