@@ -4,8 +4,8 @@
   "version": "${version}",
 
   "name": "FabLabs ${libname} version ${libver}",
-  "icon": "assets/blueprint/icon.png",
-  "description": "Template for starting out FabLabs drafts",
+  "icon": "assets/fablabs-client-command-api-v1/icon.png",
+  "description": "API for client-sided chat commands.",
   "license": "MIT",
   "contact": {
     "sources": "https://github.com/${repo}"
@@ -17,7 +17,7 @@
     ]
   },
   "mixins": [
-    "mixins.${libname}.json"
+    "mixins.fablabs-client-command-api-v1.json"
   ],
   "depends": {
     "fabricloader": ">=0.4.0"
