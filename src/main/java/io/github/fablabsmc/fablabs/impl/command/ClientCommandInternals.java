@@ -120,6 +120,6 @@ public final class ClientCommandInternals {
 	}
 
 	public static boolean isPrefixUsed(char prefix) {
-		return events.get(prefix) != null;
+		return events.containsKey(prefix);
 	}
 }
