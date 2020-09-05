@@ -17,35 +17,28 @@
 
 package io.github.fablabsmc.fablabs.test.command.client;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import io.github.fablabsmc.fablabs.api.client.command.v1.ArgumentBuilders;
 import io.github.fablabsmc.fablabs.api.client.command.v1.ClientCommandRegistrationCallback;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.MessageType;
-import net.minecraft.server.command.CommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Util;
 
 import net.fabricmc.api.ClientModInitializer;
 
 public final class ClientCommandsTest implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		ClientCommandRegistrationCallback.event().register(this::registerSimpleCommands);
+		ClientCommandRegistrationCallback.event().register(registerSimpleCommands("This is a client command"));
 		// Using `\` as prefix
-		ClientCommandRegistrationCallback.event('\\').register(this::registerSimpleCommands);
+		ClientCommandRegistrationCallback.event('\\').register(registerSimpleCommands("This is a client command with backslashes"));
 	}
 
-	private void registerSimpleCommands(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal("test-client-cmd").executes(context -> {
-			// TODO: Provide better methods for sending messages, possibly via custom command source
-			if (MinecraftClient.getInstance().player != null) {
-				MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT, new LiteralText("This is a client command"), Util.NIL_UUID);
-			}
+	private static ClientCommandRegistrationCallback registerSimpleCommands(String message) {
+		return dispatcher -> {
+			dispatcher.register(ArgumentBuilders.literal("test-client-cmd").executes(context -> {
+				context.getSource().sendFeedback(new LiteralText(message));
 
-			throw new SimpleCommandExceptionType(new LiteralText("Player was not present when command was executed?")).create();
-		}));
+				return 0;
+			}));
+		};
 	}
 }

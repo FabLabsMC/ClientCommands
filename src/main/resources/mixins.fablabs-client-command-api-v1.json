@@ -3,6 +3,7 @@
   "package": "io.github.fablabsmc.fablabs.mixin.command",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ClientCommandSourceMixin",
     "ClientPlayerEntityMixin",
     "ClientPlayNetworkHandlerMixin",
     "CommandSuggestorMixin"

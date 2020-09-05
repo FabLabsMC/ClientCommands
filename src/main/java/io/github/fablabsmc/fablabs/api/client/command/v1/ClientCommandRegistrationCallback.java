@@ -20,22 +20,53 @@ package io.github.fablabsmc.fablabs.api.client.command.v1;
 import com.mojang.brigadier.CommandDispatcher;
 import io.github.fablabsmc.fablabs.impl.command.ClientCommandInternals;
 
-import net.minecraft.server.command.CommandSource;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.Event;
 
+/**
+ * Callback for registering client-sided commands.
+ *
+ * <h2>Example</h2>
+ * <pre>
+ * {@code
+ * ClientCommandRegistrationCallback.event().register(dispatcher -> {
+ *     dispatcher.register(ArgumentBuilders.literal("hello").executes(context -> {
+ *         context.getSource().sendFeedback(new LiteralText("Hello, world!"));
+ *         return 0;
+ *     }));
+ * });
+ * }
+ * </pre>
+ */
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
 public interface ClientCommandRegistrationCallback {
+	/**
+	 * Gets the command registration event for commands with the {@code /} prefix.
+	 *
+	 * @return the event object
+	 */
 	static Event<ClientCommandRegistrationCallback> event() {
 		return event('/');
 	}
 
+	/**
+	 * Gets the command registration event with a custom command prefix.
+	 *
+	 * @param prefix the command prefix
+	 * @return the event object
+	 * @throws IllegalArgumentException if the prefix {@linkplain Character#isLetterOrDigit(char) is a letter or a digit},
+	 *                                  or if it {@linkplain Character#isWhitespace(char) is whitespace}.
+	 */
 	static Event<ClientCommandRegistrationCallback> event(char prefix) {
 		return ClientCommandInternals.event(prefix);
 	}
 
-	void register(CommandDispatcher<CommandSource> dispatcher);
+	/**
+	 * Called when a client-side command dispatcher is registering commands.
+	 *
+	 * @param dispatcher the command dispatcher to register commands to
+	 */
+	void register(CommandDispatcher<FabricClientCommandSource> dispatcher);
 }

@@ -15,28 +15,46 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package io.github.fablabsmc.fablabs.mixin.command;
+package io.github.fablabsmc.fablabs.api.client.command.v1;
 
-import com.mojang.brigadier.CommandDispatcher;
-import io.github.fablabsmc.fablabs.impl.command.ClientCommandInternals;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.server.command.CommandSource;
+import net.minecraft.text.Text;
 
-@Mixin(ClientPlayNetworkHandler.class)
-abstract class ClientPlayNetworkHandlerMixin {
-	@Shadow
-	private CommandDispatcher<CommandSource> commandDispatcher;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Inject(method = "onCommandTree", at = @At("RETURN"))
-	private void onOnCommandTree(CommandTreeS2CPacket packet, CallbackInfo info) {
-		ClientCommandInternals.addCommands('/', (CommandDispatcher) commandDispatcher);
-	}
+/**
+ * Extensions to {@link CommandSource} for client-sided commands.
+ */
+@Environment(EnvType.CLIENT)
+public interface FabricClientCommandSource extends CommandSource {
+	/**
+	 * Sends a feedback message to the player.
+	 *
+	 * @param message the feedback message
+	 */
+	void sendFeedback(Text message);
+
+	/**
+	 * Sends an error message to the player.
+	 *
+	 * @param message the error message
+	 */
+	void sendError(Text message);
+
+	/**
+	 * Gets the client instance used to run the command.
+	 *
+	 * @return the client
+	 */
+	MinecraftClient getClient();
+
+	/**
+	 * Gets the player that used the command.
+	 *
+	 * @return the player
+	 */
+	ClientPlayerEntity getPlayer();
 }

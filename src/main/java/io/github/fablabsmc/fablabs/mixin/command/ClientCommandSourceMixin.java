@@ -17,26 +17,42 @@
 
 package io.github.fablabsmc.fablabs.mixin.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import io.github.fablabsmc.fablabs.impl.command.ClientCommandInternals;
+import io.github.fablabsmc.fablabs.api.client.command.v1.FabricClientCommandSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.server.command.CommandSource;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientCommandSource;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.network.MessageType;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
-@Mixin(ClientPlayNetworkHandler.class)
-abstract class ClientPlayNetworkHandlerMixin {
+@Mixin(ClientCommandSource.class)
+abstract class ClientCommandSourceMixin implements FabricClientCommandSource {
 	@Shadow
-	private CommandDispatcher<CommandSource> commandDispatcher;
+	@Final
+	private MinecraftClient client;
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Inject(method = "onCommandTree", at = @At("RETURN"))
-	private void onOnCommandTree(CommandTreeS2CPacket packet, CallbackInfo info) {
-		ClientCommandInternals.addCommands('/', (CommandDispatcher) commandDispatcher);
+	@Override
+	public void sendFeedback(Text message) {
+		client.inGameHud.addChatMessage(MessageType.SYSTEM, message, Util.NIL_UUID);
+	}
+
+	@Override
+	public void sendError(Text message) {
+		client.inGameHud.addChatMessage(MessageType.SYSTEM, message.copy().formatted(Formatting.RED), Util.NIL_UUID);
+	}
+
+	@Override
+	public MinecraftClient getClient() {
+		return client;
+	}
+
+	@Override
+	public ClientPlayerEntity getPlayer() {
+		return client.player;
 	}
 }
