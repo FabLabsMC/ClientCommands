@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.BuiltInExceptionProvider;
+import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.fablabsmc.fablabs.api.client.command.v1.ClientCommandRegistrationCallback;
 import io.github.fablabsmc.fablabs.api.client.command.v1.FabricClientCommandSource;
@@ -30,6 +32,8 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandException;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
+import net.minecraft.text.TranslatableText;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -82,18 +86,47 @@ public final class ClientCommandInternals {
 			dispatcher.execute(message.substring(1), commandSource);
 			return true;
 		} catch (CommandSyntaxException e) {
-			// Allow the message be sent to the server since it's not a valid command.
-			// TODO: Should this be tweaked?
-			return false;
+			LOGGER.warn("Syntax exception for client-sided command '{}'", message, e);
+
+			if (isIgnoredException(e.getType())) {
+				return false;
+			}
+
+			commandSource.sendError(getErrorMessage(e));
+			return true;
 		} catch (CommandException e) {
-			LOGGER.warn("Error while executing client-sided command", e);
+			LOGGER.warn("Error while executing client-sided command '{}'", message, e);
 			commandSource.sendError(e.getTextMessage());
 			return true;
 		} catch (RuntimeException e) {
-			LOGGER.warn("Error while executing client-sided command", e);
+			LOGGER.warn("Error while executing client-sided command '{}'", message, e);
 			commandSource.sendError(Text.of(e.getMessage()));
 			return true;
 		}
+	}
+
+	/**
+	 * Tests whether a command syntax exception with the type
+	 * should be ignored and the message sent to the server.
+	 *
+	 * @param type the exception type
+	 * @return true if ignored, false otherwise
+	 */
+	private static boolean isIgnoredException(CommandExceptionType type) {
+		BuiltInExceptionProvider builtins = CommandSyntaxException.BUILT_IN_EXCEPTIONS;
+
+		// Only ignore unknown commands and node parse exceptions.
+		// The argument-related dispatcher exceptions are not ignored because
+		// they will only happen if the user enters a correct command.
+		return type == builtins.dispatcherUnknownCommand() || type == builtins.dispatcherParseException();
+	}
+
+	// See CommandSuggestor.method_30505
+	private static Text getErrorMessage(CommandSyntaxException e) {
+		Text message = Texts.toText(e.getRawMessage());
+		String context = e.getContext();
+
+		return context != null ? new TranslatableText("command.context.parse_error", message, context) : message;
 	}
 
 	/* @Nullable */
