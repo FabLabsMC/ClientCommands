@@ -19,6 +19,7 @@ package io.github.fablabsmc.fablabs.api.client.command.v1;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.text.Text;
 
@@ -57,4 +58,11 @@ public interface FabricClientCommandSource extends CommandSource {
 	 * @return the player
 	 */
 	ClientPlayerEntity getPlayer();
+
+	/**
+	 * Gets the world where the player used the command.
+	 *
+	 * @return the world
+	 */
+	ClientWorld getWorld();
 }
