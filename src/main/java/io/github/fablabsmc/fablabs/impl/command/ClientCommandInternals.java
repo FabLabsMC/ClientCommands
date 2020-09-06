@@ -80,6 +80,7 @@ public final class ClientCommandInternals {
 		MinecraftClient client = MinecraftClient.getInstance();
 
 		// The interface is implemented on ClientCommandSource with a mixin
+		// noinspection ConstantConditions
 		FabricClientCommandSource commandSource = (FabricClientCommandSource) client.getNetworkHandler().getCommandSource();
 
 		client.getProfiler().push(message);
@@ -135,18 +136,26 @@ public final class ClientCommandInternals {
 
 	/* @Nullable */
 	public static CommandDispatcher<FabricClientCommandSource> getDispatcher(char prefix) {
-		// TODO: Find a place to build these ahead of time
-		return dispatchers.computeIfAbsent(prefix, c -> {
-			Event<ClientCommandRegistrationCallback> event = events.get(prefix);
+		return dispatchers.get(prefix);
+	}
 
-			if (event == null) {
-				return null;
-			}
+	public static void buildDispatchers() {
+		// This should only be called once at the end of the client constructor.
+		if (!dispatchers.isEmpty()) {
+			throw new IllegalStateException("Dispatchers have already been built!");
+		}
 
+		LOGGER.debug("Building client-side command dispatchers");
+
+		for (char prefix : events.keySet()) {
 			CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
 			addCommands(prefix, dispatcher);
-			return dispatcher;
-		});
+			// noinspection CodeBlock2Expr
+			dispatcher.findAmbiguities((parent, child, sibling, inputs) -> {
+				LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {} (client-side command prefix: {})", dispatcher.getPath(child), dispatcher.getPath(sibling), inputs, prefix);
+			});
+			dispatchers.put(prefix, dispatcher);
+		}
 	}
 
 	public static void addCommands(char prefix, CommandDispatcher<FabricClientCommandSource> dispatcher) {
