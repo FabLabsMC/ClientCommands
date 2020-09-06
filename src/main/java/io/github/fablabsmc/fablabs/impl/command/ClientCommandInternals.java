@@ -82,6 +82,8 @@ public final class ClientCommandInternals {
 		// The interface is implemented on ClientCommandSource with a mixin
 		FabricClientCommandSource commandSource = (FabricClientCommandSource) client.getNetworkHandler().getCommandSource();
 
+		client.getProfiler().push(message);
+
 		try {
 			dispatcher.execute(message.substring(1), commandSource);
 			return true;
@@ -102,6 +104,8 @@ public final class ClientCommandInternals {
 			LOGGER.warn("Error while executing client-sided command '{}'", message, e);
 			commandSource.sendError(Text.of(e.getMessage()));
 			return true;
+		} finally {
+			client.getProfiler().pop();
 		}
 	}
 
