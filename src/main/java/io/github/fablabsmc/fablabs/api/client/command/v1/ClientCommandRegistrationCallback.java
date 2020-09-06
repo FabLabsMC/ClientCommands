@@ -27,6 +27,13 @@ import net.fabricmc.fabric.api.event.Event;
 /**
  * Callback for registering client-sided commands.
  *
+ * <p>Client-sided commands are fully executed on the client,
+ * so players can use them in both singleplayer and multiplayer.
+ *
+ * <p>Client-sided commands also support using custom command
+ * prefixes instead of the {@code /} symbol. You can customize
+ * the used prefix with {@link #event(char)}.
+ *
  * <h2>Example</h2>
  * <pre>
  * {@code
