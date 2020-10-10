@@ -34,6 +34,10 @@ import net.fabricmc.fabric.api.event.Event;
  * prefixes instead of the {@code /} symbol. You can customize
  * the used prefix with {@link #event(char)}.
  *
+ * <p>The commands are run on the client game thread by default.
+ * Avoid doing any heavy calculations here as that can freeze the game's rendering.
+ * For example, you can move heavy code to another thread.
+ *
  * <h2>Example</h2>
  * <pre>
  * {@code
